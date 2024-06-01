@@ -1,19 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const App = () => {
-  const [days, setDays] = useState("01");
-  const [hours, setHours] = useState("01");
-  const [minutes, setMinutes] = useState("40");
-  const [seconds, setSeconds] = useState("10");
+  const [days, setDays] = useState("1");
+  const [hours, setHours] = useState("0");
+  const [minutes, setMinutes] = useState("0");
+  const [seconds, setSeconds] = useState("1");
+  const [reset, setReset] = useState(false);
+  const [timerId, setTimerId] = useState(0);
+
+  useEffect(() => {
+    if (!reset) {
+      if (seconds === 59) {
+        setMinutes((minute) => (minute > 0 ? minute - 1 : 59));
+      }
+    }
+  }, [seconds, reset]);
+
+  useEffect(() => {
+    if (!reset) {
+      if (minutes === 59 && seconds === 59) {
+        setHours((hour) => (hour > 0 ? hour - 1 : 23));
+      }
+    }
+  }, [minutes, seconds, reset]);
+
+  useEffect(() => {
+    if (!reset) {
+      if (minutes === 59 && seconds === 59 && hours === 23) {
+        setDays((day) => (day > 0 ? day - 1 : 0));
+      }
+    }
+  }, [minutes, seconds, hours, reset]);
 
   const handleStart = () => {
-    setInterval(() => {
-      setSeconds((second) => (second > 0 ? second - 1 : 60));
-    }, 1000);
+    if (!(days === 0 && hours === 0 && minutes === 0 && seconds === 0)) {
+      const tId = setInterval(() => {
+        setSeconds((second) => (second > 0 ? second - 1 : 59));
+      }, 1000);
+      setTimerId(tId);
+    }
   };
 
-  const handleStop = () => {};
-  const handleReset = () => {};
+  const handlePause = () => {
+    clearInterval(timerId);
+  };
+
+  const handleReset = () => {
+    clearInterval(timerId);
+
+    setReset(true);
+    setDays(0);
+    setHours(0);
+    setMinutes(0);
+    setSeconds(0);
+  };
 
   return (
     <div>
@@ -44,9 +84,9 @@ const App = () => {
         </button>
         <button
           className="bg-black rounded-full text-white p-6 m-2"
-          onClick={handleStop}
+          onClick={handlePause}
         >
-          Stop
+          Pause
         </button>
         <button
           className="bg-black rounded-full text-white p-6 m-2"
